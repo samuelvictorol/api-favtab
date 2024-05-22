@@ -16,6 +16,10 @@ const usuarioSchema = new Schema({
         type: String,
         required: true
     },
+    role:{
+        type: String,
+        required: true,
+    },
     private:{
         type: Boolean,
         required: true,
@@ -28,6 +32,10 @@ const usuarioSchema = new Schema({
     user_image:{
         type: String,
         required: false
+    },
+    logado:{
+        type: Boolean,
+        required: true,
     },
     },
     { timestamps: true }
