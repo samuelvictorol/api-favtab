@@ -13,13 +13,13 @@ const usuarioController = {
         private: false,
         email: req.body.email,
         role: 'basic_user',
-        user_image: 'https://images.vexels.com/media/users/3/265630/isolated/preview/1c7952bc7326df8d7f58a633405699aa-boy-listening-to-music.png',
+        user_image: 'https://static.vecteezy.com/system/resources/previews/024/029/997/original/music-band-clipart-transparent-background-free-png.png',
         logado: true,
       };
 
       console.log(req.body);
       const response = await UsuarioModel.create(usuario);
-
+      console.log(typeof response);
       res.status(201).json({
         response,
         message: `Usuário ${req.body.login} Registrado com Sucesso`,
@@ -27,7 +27,7 @@ const usuarioController = {
     } catch (error) {
       res
         .status(500)
-        .json({ error, message: "Este Login ou Email já está cadastrado" });
+        .json({ error, message: "Login ou Email já cadastrado no FavTab" });
         console.log("Erro controller usuario\n" + error);
     }
   },
@@ -49,10 +49,12 @@ const usuarioController = {
           message: "Login Efetuado com Sucesso!",
           response: responseUsuario,
         });
+        return
       } else {
-        res.status(200).json({
+        res.status(401).json({
           message: "Credenciais Não Encontradas no Sistema",
         });
+        return;
       }
     } catch (error) {
       res.status(500).json({ message: "Erro na requisição com o banco" });
