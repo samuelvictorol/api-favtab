@@ -33,7 +33,7 @@ const usuarioController = {
   },
   validaUsuario: async (req, res) => {
     try {
-      const usuario = await UsuarioModel.findOne({ login: req.body.login });
+      const usuario = await UsuarioModel.findOne({ login: req.body.login.toLowerCase() });
       // console.log(req.body);
       if (usuario && (await bcrypt.compare(req.body.senha, usuario.senha))) {
         const responseUsuario = {

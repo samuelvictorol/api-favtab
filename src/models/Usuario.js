@@ -5,16 +5,20 @@ const { Schema } = mongoose
 const usuarioSchema = new Schema({
     nome: {
         type: String,
+        maxlength: 100,
         required: true,
     },
     login: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        maxlength: 30
     },
     senha:{
         type: String,
-        required: true
+        required: true,
+        maxlength: 30,
+
     },
     role:{
         type: String,
