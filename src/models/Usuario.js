@@ -17,7 +17,7 @@ const usuarioSchema = new Schema({
     senha:{
         type: String,
         required: true,
-        maxlength: 30,
+        maxlength: 100,
 
     },
     role:{

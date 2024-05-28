@@ -6,7 +6,7 @@ router
     .route('/novo-repertorio')
     .post((req, res) => repertorioController.novoRepertorio(req, res))
 router
-    .route('/repertorios/:login/:senha')
+    .route('/repertorios/:login/:senha?')
     .get((req, res) => repertorioController.getUsersRepertorios(req, res))
 
 module.exports = router
