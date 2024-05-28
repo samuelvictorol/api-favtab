@@ -40,6 +40,39 @@ const repertorioController = {
             });
         }
     },
+    getUsersRepertorios: async (req, res) => {
+        const { login, senha } = req.params;
+        if(!login || login.trim() === ''){
+            res.status(400).json({
+                message: 'Campo Login é obrigatório',
+            });
+            return;
+        }
+        try{
+            if(!senha || senha.trim() === ''){
+                const repertorios = await RepertorioModel.find({ criadoPor: login, private: false }).populate('musicas');
+                return res.status(200).json(repertorios);
+            } else {
+                const usuario = await UsuarioModel.findOne({ login });
+                if(!usuario){
+                    return res.status(404).json({
+                        message: 'Usuário não encontrado',
+                    });
+                } else if(usuario.senha !== senha){
+                    return res.status(401).json({
+                        message: 'Senha inválida',
+                    });
+                }
+                const repertorios = await RepertorioModel.find({ criadoPor: login }).populate('musicas');
+                return res.status(200).json(repertorios);
+            }
+        } catch (error) {
+            res.status(400).json({
+                message: 'Erro ao buscar repertórios',
+                error: error.message,
+            });
+        }
+    },
 };
 
 module.exports = repertorioController;

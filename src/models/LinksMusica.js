@@ -10,6 +10,7 @@ const linksMusicaSchema = new Schema({
     link: {
         type: String,
         required: true,
+        maxlength: 500,
     },
 }, { timestamps: true });
 
