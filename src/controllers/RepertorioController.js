@@ -9,11 +9,14 @@ const repertorioController = {
 
         try {
             // Primeiro, criar todas as músicas e obter seus IDs
-            const musicasIds = await Promise.all(musicas.map(async (musica) => {
-                const novaMusica = new MusicaModel(musica);
-                const musicaSalva = await novaMusica.save();
-                return musicaSalva._id;
-            }));
+            let musicasIds = [];
+            if(musicas){
+                musicasIds = await Promise.all(musicas.map(async (musica) => {
+                    const novaMusica = new MusicaModel(musica);
+                    const musicaSalva = await novaMusica.save();
+                    return musicaSalva._id;
+                }));
+            }
 
             // Criação do objeto Repertório com IDs das músicas
             const repertorio = {
@@ -44,37 +47,76 @@ const repertorioController = {
     },
     getUsersRepertorios: async (req, res) => {
         const { login, senha } = req.params;
-        if(!login || login.trim() === ''){
-            res.status(400).json({
+        const { page = 1, rowsPerPage = 5 } = req.query;  // Parâmetros de paginação
+
+        if (!login || login.trim() === '') {
+            return res.status(400).json({
                 message: 'Campo Login é obrigatório',
             });
-            return;
         }
-        try{
-            if(!senha || senha.trim() === ''){
-                const repertorios = await RepertorioModel.find({ criadoPor: login, private: false }).populate('musicas');
-                return res.status(200).json(repertorios);
+
+        const skip = (page - 1) * rowsPerPage;
+        const limit = parseInt(rowsPerPage);
+
+        try {
+            if (!senha || senha.trim() === '') {
+                // Se a senha não for fornecida, apenas repertórios públicos serão retornados
+                const repertorios = await RepertorioModel.find({ criadoPor: login, private: false })
+                    .select('nome descricao curtidas private')
+                    .skip(skip)
+                    .limit(limit);
+
+                const totalItems = await RepertorioModel.countDocuments({ criadoPor: login, private: false });
+
+                return res.status(200).json({
+                    repertorios,
+                    pagination: {
+                        page: parseInt(page),
+                        rowsPerPage: limit,
+                        totalItems,
+                        isLastPage: skip + repertorios.length >= totalItems,
+                        isFirstPage: page == 1
+                    }
+                });
             } else {
                 const usuario = await UsuarioModel.findOne({ login });
-                if(!usuario){
+                if (!usuario) {
                     return res.status(404).json({
                         message: 'Usuário não encontrado',
                     });
-                } else if(!(await bcrypt.compare(senha, usuario.senha))){
+                } else if (!(await bcrypt.compare(senha, usuario.senha))) {
                     return res.status(401).json({
                         message: 'Senha inválida',
                     });
                 }
-                const repertorios = await RepertorioModel.find({ criadoPor: login }).populate('musicas');
-                return res.status(200).json({repertorios});
+
+                // Se a senha for fornecida e válida, todos os repertórios serão retornados
+                const repertorios = await RepertorioModel.find({ criadoPor: login })
+                    .select('nome descricao curtidas private')
+                    .skip(skip)
+                    .limit(limit);
+
+                const totalItems = await RepertorioModel.countDocuments({ criadoPor: login });
+
+                return res.status(200).json({
+                    repertorios,
+                    pagination: {
+                        page: parseInt(page),
+                        rowsPerPage: limit,
+                        totalItems,
+                        isLastPage: skip + repertorios.length >= totalItems,
+                        isFirstPage: page == 1
+                    }
+                });
             }
         } catch (error) {
-            res.status(400).json({
+            return res.status(400).json({
                 message: 'Erro ao buscar repertórios',
                 error: error.message,
             });
         }
     },
+
 };
 
 module.exports = repertorioController;
