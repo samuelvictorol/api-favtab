@@ -39,6 +39,7 @@ const usuarioController = {
         const responseUsuario = {
           nome: usuario.nome,
           login: usuario.login,
+          senha: usuario.senha,
           private: usuario.private,
           role: usuario.role,
           user_image: usuario.user_image,
@@ -63,7 +64,7 @@ const usuarioController = {
   },
   logout: async (req, res) => {
     try {
-      const usuario = await UsuarioModel.findOne({ login: req.body.login });
+      const usuario = await UsuarioModel.findOne({ login: req.body.login, senha: req.body.senha});
       usuario.logado = false;
       usuario.save();
       res.status(201).json({

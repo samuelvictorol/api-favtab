@@ -10,5 +10,8 @@ router
 router
     .route('/login')
     .post((req,res) => usuarioController.validaUsuario(req,res))
-    
+
+router
+    .route('/logout')
+    .post((req,res) => usuarioController.logout(req,res))
 module.exports = router

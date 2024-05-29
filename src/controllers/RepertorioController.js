@@ -63,6 +63,7 @@ const repertorioController = {
                 // Se a senha não for fornecida, apenas repertórios públicos serão retornados
                 const repertorios = await RepertorioModel.find({ criadoPor: login, private: false })
                     .select('nome descricao curtidas private')
+                    .sort({ createdAt: -1 })  // Ordenando do mais recente para o mais antigo
                     .skip(skip)
                     .limit(limit);
 
@@ -74,6 +75,7 @@ const repertorioController = {
                         page: parseInt(page),
                         rowsPerPage: limit,
                         totalItems,
+                        totalPages: Math.ceil(totalItems / limit),
                         isLastPage: skip + repertorios.length >= totalItems,
                         isFirstPage: page == 1
                     }
@@ -84,7 +86,7 @@ const repertorioController = {
                     return res.status(404).json({
                         message: 'Usuário não encontrado',
                     });
-                } else if (!(await bcrypt.compare(senha, usuario.senha))) {
+                } else if (senha !== usuario.senha) {
                     return res.status(401).json({
                         message: 'Senha inválida',
                     });
@@ -93,6 +95,7 @@ const repertorioController = {
                 // Se a senha for fornecida e válida, todos os repertórios serão retornados
                 const repertorios = await RepertorioModel.find({ criadoPor: login })
                     .select('nome descricao curtidas private')
+                    .sort({ createdAt: -1 })  // Ordenando do mais recente para o mais antigo
                     .skip(skip)
                     .limit(limit);
 
@@ -104,6 +107,7 @@ const repertorioController = {
                         page: parseInt(page),
                         rowsPerPage: limit,
                         totalItems,
+                        totalPages: Math.ceil(totalItems / limit),
                         isLastPage: skip + repertorios.length >= totalItems,
                         isFirstPage: page == 1
                     }
