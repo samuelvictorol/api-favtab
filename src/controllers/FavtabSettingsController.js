@@ -13,6 +13,7 @@ const favtabSettingsController = {
                 initializerOptions: new Date(),
             };
             await HibernateBreakModel.create(hibernateBreak);
+            console.log("Hibernate Break Inicializado com Sucesso " + str);
             res.status(201).json({
                 message: "Hibernate Break Inicializado com Sucesso " + str,
             });

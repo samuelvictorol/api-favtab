@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 const repertorioController = {
     novoRepertorio: async (req, res) => {
         const { nome, descricao, genero, private, login, musicas } = req.body;
-
+        console.log(req.body);
         try {
             // Primeiro, criar todas as músicas e obter seus IDs
             let musicasIds = [];
