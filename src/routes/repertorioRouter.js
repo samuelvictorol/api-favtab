@@ -8,5 +8,10 @@ router
 router
     .route('/repertorios/:login/:senha?')
     .get((req, res) => repertorioController.getUsersRepertorios(req, res))
-
+router
+    .route('/repertorios')
+    .post((req, res) => repertorioController.getOneRepertorio(req, res))
+router
+    .route('/musica')
+    .post((req, res) => repertorioController.getOneMusica(req, res))
 module.exports = router

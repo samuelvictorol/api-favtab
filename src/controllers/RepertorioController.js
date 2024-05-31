@@ -120,6 +120,73 @@ const repertorioController = {
             });
         }
     },
+    getOneRepertorio: async (req, res) => {
+        const { _id, login, senha } = req.body;
+    
+        try {
+            // Buscar o repertório pelo ID e popular apenas os campos nome e link_audio das músicas
+            const repertorio = await RepertorioModel.findById(_id)
+                .populate({
+                    path: 'musicas',
+                    select: '_id nome link_audio' // Selecionar apenas os campos nome e link_audio
+                });
+    
+            if (!repertorio) {
+                return res.status(404).json({
+                    message: 'Repertório não encontrado',
+                });
+            }
+    
+            if (repertorio.private) {
+                if (!senha || senha.trim() === '') {
+                    return res.status(401).json({
+                        message: 'Senha é obrigatória para acessar repertório privado',
+                    });
+                }
+                const usuario = await UsuarioModel.findOne({ login });
+                if (!usuario) {
+                    return res.status(404).json({
+                        message: 'Usuário não encontrado',
+                    });
+                } else if (senha !== usuario.senha) {
+                    return res.status(401).json({
+                        message: 'Você não tem permissão para acessar este repertório privado',
+                    });
+                }
+            }
+    
+            return res.status(200).json({
+                repertorio,
+            });
+        } catch (error) {
+            return res.status(400).json({
+                message: 'Erro ao buscar repertório',
+                error: error.message,
+            });
+        }
+    },
+    getOneMusica: async (req, res) => {
+        const { _id } = req.body;
+    
+        try {
+            // Buscar a música pelo ID
+            const musica = await MusicaModel.findById(_id);
+            if (!musica) {
+                return res.status(404).json({
+                    message: 'Música não encontrada',
+                });
+            } else {
+                return res.status(200).json({
+                    musica,
+                });
+            }
+        } catch (error) {
+            return res.status(400).json({
+                message: 'Erro ao buscar música',
+                error: error.message,
+            });
+        }
+    }
 
 };
 
