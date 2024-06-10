@@ -48,38 +48,20 @@ const repertorioController = {
     getUsersRepertorios: async (req, res) => {
         const { login, senha } = req.params;
         const { page = 1, rowsPerPage = 5 } = req.query;  // Parâmetros de paginação
-
+    
         if (!login || login.trim() === '') {
             return res.status(400).json({
                 message: 'Campo Login é obrigatório',
             });
         }
-
+    
         const skip = (page - 1) * rowsPerPage;
         const limit = parseInt(rowsPerPage);
-
+    
         try {
+            let query = { criadoPor: login };
             if (!senha || senha.trim() === '') {
-                // Se a senha não for fornecida, apenas repertórios públicos serão retornados
-                const repertorios = await RepertorioModel.find({ criadoPor: login, private: false })
-                    .select('nome descricao curtidas private')
-                    .sort({ createdAt: -1 })  // Ordenando do mais recente para o mais antigo
-                    .skip(skip)
-                    .limit(limit);
-
-                const totalItems = await RepertorioModel.countDocuments({ criadoPor: login, private: false });
-
-                return res.status(200).json({
-                    repertorios,
-                    pagination: {
-                        page: parseInt(page),
-                        rowsPerPage: limit,
-                        totalItems,
-                        totalPages: Math.ceil(totalItems / limit),
-                        isLastPage: skip + repertorios.length >= totalItems,
-                        isFirstPage: page == 1
-                    }
-                });
+                query.private = false;
             } else {
                 const usuario = await UsuarioModel.findOne({ login });
                 if (!usuario) {
@@ -91,28 +73,32 @@ const repertorioController = {
                         message: 'Senha inválida',
                     });
                 }
-
-                // Se a senha for fornecida e válida, todos os repertórios serão retornados
-                const repertorios = await RepertorioModel.find({ criadoPor: login })
-                    .select('nome descricao curtidas private')
-                    .sort({ createdAt: -1 })  // Ordenando do mais recente para o mais antigo
-                    .skip(skip)
-                    .limit(limit);
-
-                const totalItems = await RepertorioModel.countDocuments({ criadoPor: login });
-
-                return res.status(200).json({
-                    repertorios,
-                    pagination: {
-                        page: parseInt(page),
-                        rowsPerPage: limit,
-                        totalItems,
-                        totalPages: Math.ceil(totalItems / limit),
-                        isLastPage: skip + repertorios.length >= totalItems,
-                        isFirstPage: page == 1
-                    }
-                });
             }
+    
+            const repertorios = await RepertorioModel.find(query)
+                .select('nome descricao curtidas private musicas')
+                .sort({ createdAt: -1 })  // Ordenando do mais recente para o mais antigo
+                .skip(skip)
+                .limit(limit);
+    
+            const totalItems = await RepertorioModel.countDocuments(query);
+    
+            const repertoriosWithMusicasSize = repertorios.map(repertorio => ({
+                ...repertorio.toObject(),
+                musicas_size: repertorio.musicas.length,
+            }));
+    
+            return res.status(200).json({
+                repertorios: repertoriosWithMusicasSize,
+                pagination: {
+                    page: parseInt(page),
+                    rowsPerPage: limit,
+                    totalItems,
+                    totalPages: Math.ceil(totalItems / limit),
+                    isLastPage: skip + repertorios.length >= totalItems,
+                    isFirstPage: page == 1,
+                }
+            });
         } catch (error) {
             return res.status(400).json({
                 message: 'Erro ao buscar repertórios',
@@ -120,6 +106,7 @@ const repertorioController = {
             });
         }
     },
+    
     getOneRepertorio: async (req, res) => {
         const { _id, login, senha } = req.body;
     
