@@ -5,19 +5,42 @@ const bcrypt = require("bcrypt");
 
 const repertorioController = {
     novoRepertorio: async (req, res) => {
-        const { nome, descricao, genero, private, login, musicas } = req.body;
+        const { nome, descricao, genero, private, login, password, musicas } = req.body;
         console.log(req.body);
         try {
+            // Verificar a senha do usuário
+            const usuario = await UsuarioModel.findOne({ login });
+            if (!usuario) {
+                return res.status(400).json({
+                    message: 'Usuário não encontrado',
+                });
+            }
+    
+            const senhaValida = (usuario.senha == password);
+            if (!senhaValida) {
+                return res.status(400).json({
+                    message: 'Usuário não está autenticado',
+                });
+            }
+    
+            // Verificar quantos repertórios o usuário já tem
+            const repertoriosDoUsuario = await RepertorioModel.find({ criadoPor: login });
+            if (repertoriosDoUsuario.length >= 10) {
+                return res.status(400).json({
+                    message: 'O usuário já atingiu o limite de 10 repertórios',
+                });
+            }
+    
             // Primeiro, criar todas as músicas e obter seus IDs
             let musicasIds = [];
-            if(musicas){
+            if (musicas) {
                 musicasIds = await Promise.all(musicas.map(async (musica) => {
                     const novaMusica = new MusicaModel(musica);
                     const musicaSalva = await novaMusica.save();
                     return musicaSalva._id;
                 }));
             }
-
+    
             // Criação do objeto Repertório com IDs das músicas
             const repertorio = {
                 nome,
@@ -28,10 +51,10 @@ const repertorioController = {
                 curtidas: 0,
                 musicas: musicasIds,
             };
-
+    
             // Criação do novo repertório no banco de dados
             const response = await RepertorioModel.create(repertorio);
-
+    
             // Resposta de sucesso
             res.status(201).json({
                 response,
@@ -45,6 +68,7 @@ const repertorioController = {
             });
         }
     },
+    
     getUsersRepertorios: async (req, res) => {
         const { login, senha } = req.params;
         const { page = 1, rowsPerPage = 5 } = req.query;  // Parâmetros de paginação
