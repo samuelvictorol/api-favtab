@@ -1,15 +1,12 @@
-const bcrypt = require("bcrypt");
-const { Usuario: UsuarioModel } = require("../models/Usuario");
+const UsuarioManager = require("../managers/UsuarioManager");
 
 const usuarioController = {
   registrar: async (req, res) => {
     try {
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(req.body.senha, salt);
       const usuario = {
         nome: req.body.nome.toLowerCase(),
         login: req.body.login.toLowerCase(),
-        senha: hashedPassword,
+        senha: req.body.senha,
         private: false,
         email: req.body.email,
         role: 'basic_user',
@@ -17,9 +14,8 @@ const usuarioController = {
         logado: true,
       };
 
-      console.log(req.body);
-      const response = await UsuarioModel.create(usuario);
-      console.log(typeof response);
+      const response = await UsuarioManager.registrarUsuario(usuario);
+
       res.status(201).json({
         response,
         message: `Usuário ${req.body.login} Registrado com Sucesso`,
@@ -33,9 +29,8 @@ const usuarioController = {
   },
   validaUsuario: async (req, res) => {
     try {
-      const usuario = await UsuarioModel.findOne({ login: req.body.login.toLowerCase() });
-      // console.log(req.body);
-      if (usuario && (await bcrypt.compare(req.body.senha, usuario.senha))) {
+      const usuario = await UsuarioManager.login({ login: req.body.login.toLowerCase(), senha: req.body.senha});
+      if (usuario) {
         const responseUsuario = {
           nome: usuario.nome,
           login: usuario.login,
@@ -44,32 +39,24 @@ const usuarioController = {
           role: usuario.role,
           user_image: usuario.user_image,
         };
-        usuario.logado = true;
-        usuario.save();
-        res.status(201).json({
+
+        return res.status(201).json({
           message: "Login Efetuado com Sucesso!",
           response: responseUsuario,
         });
-        return
       } else {
-        res.status(401).json({
-          message: "Credenciais Não Encontradas no Sistema",
+        return res.status(401).json({
+          message: "Credenciais inválidas",
         });
-        return;
       }
     } catch (error) {
-      res.status(500).json({ message: "Erro na requisição com o banco" });
+      res.status(500).json({ message: "Erro de conexão com o banco" });
       console.log(error);
     }
   },
   logout: async (req, res) => {
     try {
-      const usuario = await UsuarioModel.findOne({ login: req.body.login, senha: req.body.senha});
-      usuario.logado = false;
-      usuario.save();
-      res.status(201).json({
-        message: "Logout Efetuado com Sucesso!",
-      });
+      await UsuarioManager.logout({ login: req.body.login, senha: req.body.senha});
     } catch (error) {
       res.status(500).json({ message: "Erro na requisição com o banco" });
       console.log(error);
