@@ -1,0 +1,3 @@
+c
+
+module.exports = MusicaManager;
