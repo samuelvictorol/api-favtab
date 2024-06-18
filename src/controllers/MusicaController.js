@@ -72,6 +72,33 @@ const musicaController = {
                 error: error.message,
             });
         }
+    },removerMusica: async (req, res) => {
+        const { musicaId, login, senha } = req.body;
+        try {
+            if(!await UsuarioManager.getUser({login: login, senha: senha})){
+                return res.status(400).json({
+                    message: 'Credenciais inválidas',
+                });
+            }
+            const musica = await MusicaManager.findById(musicaId);
+            if(!musica){
+                return res.status(404).json({
+                    message: 'Música não encontrada',
+                });
+            } else {
+                await musica.remove();
+                return res.status(200).json({
+                    message: 'Música removida com sucesso',
+                });
+            }
+        } catch (error) {
+            return res.status(400).json({
+                message: 'Erro ao remover música',
+                error: error.message,
+            });
+        }
+    
+        
     },
     removerLinks: async (req, res) => {
         const { musicaId, linksIds, login, senha } = req.body;
