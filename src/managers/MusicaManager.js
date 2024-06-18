@@ -1,3 +1,4 @@
+const { Musica: MusicaModel } = require("../models/Musica");
 
 const MusicaManager = {
     criarMusicas:async (musicas) => {
@@ -10,7 +11,8 @@ const MusicaManager = {
     },
     findById: async (id) => {
         return await MusicaModel.findById(id);
-    }
+    },
+
 }
 
 module.exports = MusicaManager;
