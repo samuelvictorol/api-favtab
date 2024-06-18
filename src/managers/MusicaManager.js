@@ -12,6 +12,11 @@ const MusicaManager = {
     findById: async (id) => {
         return await MusicaModel.findById(id);
     },
+    adicionarLinksMusica: async (musicaId, links) => {
+        const musica = await MusicaModel.findById(musicaId);
+        musica.links_musica.push(...links);
+        return await musica.save();
+    }
 
 }
 

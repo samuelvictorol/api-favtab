@@ -38,6 +38,33 @@ const musicaController = {
                 error: error.message,
             });
         }
+    },
+    criarLinkMusica: async (req, res) => {
+        const { musicaId, links, login, senha } = req.body;
+        try {
+            if(!await UsuarioManager.getUser({login: login, senha: senha})){
+                return res.status(400).json({
+                    message: 'Credenciais inválidas',
+                });
+            }
+            const musica = await MusicaManager.findById(musicaId);
+            if(!musica){
+                return res.status(404).json({
+                    message: 'Música não encontrada',
+                });
+            } else {
+                    const musicaResponse = await MusicaManager.adicionarLinksMusica(musicaId, links);
+                    return res.status(201).json({
+                        message: 'Links de música adicionado com sucesso',
+                        musica: musicaResponse
+                    });
+            }
+        } catch (error) {
+            return res.status(400).json({
+                message: 'Erro ao criar link de música',
+                error: error.message,
+            });
+        }
     }
 }
 
