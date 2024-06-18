@@ -33,9 +33,7 @@ const UsuarioManager = {
         const usuario = await UsuarioModel.findOne({login: user.login, senha: user.senha});
         usuario.logado = false;
         usuario.save();
-        return res.status(201).json({
-            message: "Logout Efetuado com Sucesso!",
-        });
+        return true
     },
 }
 

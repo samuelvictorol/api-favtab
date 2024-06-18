@@ -56,10 +56,13 @@ const usuarioController = {
   },
   logout: async (req, res) => {
     try {
-      await UsuarioManager.logout({ login: req.body.login, senha: req.body.senha});
+      if(await UsuarioManager.logout({ login: req.body.login, senha: req.body.senha})){
+        res.status(201).json({
+          message: "Logout Efetuado com Sucesso!",
+      });
+      }
     } catch (error) {
-      res.status(500).json({ message: "Erro na requisição com o banco" });
-      console.log(error);
+      return res.status(500).json({ message: "Erro na requisição com o banco" });
     }
   },
   resetPassword: async (req, res) => {
