@@ -27,7 +27,7 @@ const repertorioSchema = new Schema({
     },
     musicas: [{
         type: Schema.Types.ObjectId,
-        ref: 'musica',
+        ref: 'Musica',
         required: true,
     }],
 }, { timestamps: true });

@@ -26,7 +26,7 @@ const RepertorioManager = {
             return repertorio.populate({
                 path: 'musicas',
                 select: 'nome link_audio'
-            }).execPopulate();
+            });
         }
         return repertorio;
     },  
