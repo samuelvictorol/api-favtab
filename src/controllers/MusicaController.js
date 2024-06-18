@@ -53,15 +53,49 @@ const musicaController = {
                     message: 'Música não encontrada',
                 });
             } else {
-                    const musicaResponse = await MusicaManager.adicionarLinksMusica(musicaId, links);
-                    return res.status(201).json({
-                        message: 'Links de música adicionado com sucesso',
-                        musica: musicaResponse
-                    });
+                    await MusicaManager.adicionarLinksMusica(musicaId, links)
+                        .then(() => {
+                            return res.status(201).json({
+                                message: 'Link/Letra adicionado(a) a musica ' + musica.nome + ' com sucesso',
+                            });
+                        })
+                        .catch((error) => {
+                            return res.status(400).json({
+                                message: 'Erro ao adicionar link/letra a música',
+                                error: error.message,
+                            });
+                        });
             }
         } catch (error) {
             return res.status(400).json({
                 message: 'Erro ao criar link de música',
+                error: error.message,
+            });
+        }
+    },
+    removerLinks: async (req, res) => {
+        const { musicaId, linksIds, login, senha } = req.body;
+        try {
+            if(!await UsuarioManager.getUser({login: login, senha: senha})){
+                return res.status(400).json({
+                    message: 'Credenciais inválidas',
+                });
+            }
+            const musica = await MusicaManager.findById(musicaId);
+            if(!musica){
+                return res.status(404).json({
+                    message: 'Música não encontrada',
+                });
+            } else {
+                musica.links_musica = musica.links_musica.filter((link) => !linksIds.includes(link._id.toString()));
+                await musica.save();
+                return res.status(200).json({
+                    message: 'Links removidos com sucesso',
+                });
+            }
+        } catch (error) {
+            return res.status(400).json({
+                message: 'Erro ao remover link de música',
                 error: error.message,
             });
         }
