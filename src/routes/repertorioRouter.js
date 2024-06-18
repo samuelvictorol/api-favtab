@@ -11,6 +11,7 @@ router
 router
     .route('/repertorios')
     .post((req, res) => repertorioController.getOneRepertorio(req, res))
+    .delete((req, res) => repertorioController.removerRepertorios(req, res))
 router
     .route('/musica')
     .post((req, res) => repertorioController.getOneMusica(req, res))

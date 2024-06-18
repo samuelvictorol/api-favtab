@@ -16,7 +16,7 @@ const RepertorioManager = {
     findByLogin: async (login, skip, limit) => {
         return await RepertorioModel.find({ criadoPor: login })
             .select('nome descricao curtidas private musicas')
-            .sort({ createdAt: -1 })  // Ordenando do mais recente para o mais antigo
+            .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
     },
@@ -29,6 +29,9 @@ const RepertorioManager = {
             }).execPopulate();
         }
         return repertorio;
+    },  
+    removerRepertorios: async (idsRepertoriosArray, user) => {
+        return await RepertorioModel.deleteMany({ _id: { $in: idsRepertoriosArray }, criadoPor: user.login });
     },
 }
 

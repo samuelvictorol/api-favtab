@@ -134,7 +134,30 @@ const repertorioController = {
             });
         }
     },
+    removerRepertorios: async (req, res) => {
+        const { idsRepertoriosArray, login, senha } = req.body;
+    
+        try {
+            const usuario = await UsuarioManager.getUser({ login: login, senha: senha });
+            if (!usuario) {
+                return res.status(404).json({
+                    message: 'Credenciais inválidas',
+                });
+            }
 
+            const repertorio = await RepertorioManager.removerRepertorios(idsRepertoriosArray, usuario);
+    
+            return res.status(200).json({
+                response: repertorio,
+                message: 'Repertório removido com sucesso',
+            });
+        } catch (error) {
+            return res.status(400).json({
+                message: 'Erro ao remover repertório',
+                error: error.message,
+            });
+        }
+    },
 };
 
 module.exports = repertorioController;
