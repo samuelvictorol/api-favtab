@@ -149,7 +149,7 @@ const repertorioController = {
     
             return res.status(200).json({
                 response: repertorio,
-                message: 'Repertório removido com sucesso',
+                message: idsRepertoriosArray.length + ' repertório(s) removido(s) com sucesso',
             });
         } catch (error) {
             return res.status(400).json({
