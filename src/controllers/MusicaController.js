@@ -117,7 +117,7 @@ const musicaController = {
                 musica.links_musica = musica.links_musica.filter((link) => !linksIds.includes(link._id.toString()));
                 await musica.save();
                 return res.status(200).json({
-                    message: 'Links removidos com sucesso',
+                    message: 'Link removido com sucesso',
                 });
             }
         } catch (error) {
